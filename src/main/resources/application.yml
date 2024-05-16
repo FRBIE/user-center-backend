@@ -1,4 +1,6 @@
 spring:
+ session:
+  timeout: 86400
  application:
   name: user-center
  datasource:
@@ -11,3 +13,8 @@ server:
 mybatis-plus:
  configuration:
   map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+     logic-delete-field: isDelete # 全局逻辑删除字段名
+     logic-delete-value: 1 # 逻辑已删除值
+     logic-not-delete-value: 0 # 逻辑未删除值
