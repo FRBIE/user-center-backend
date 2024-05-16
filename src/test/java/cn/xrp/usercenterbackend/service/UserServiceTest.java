@@ -1,6 +1,7 @@
 package cn.xrp.usercenterbackend.service;
 
 
+import cn.xrp.usercenterbackend.model.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
