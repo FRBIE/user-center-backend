@@ -9,7 +9,9 @@ spring:
   password: Xrp220903
   url: jdbc:mysql://localhost:3306/user_center?useUnicode=true&characterEncoding=UTF8&useSSL=false&serverTimezone=GMT%2B8
 server:
-  port: 8080
+ port: 8080
+ servlet:
+  context-path: /api
 mybatis-plus:
  configuration:
   map-underscore-to-camel-case: false

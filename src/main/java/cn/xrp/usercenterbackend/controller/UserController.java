@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cn.xrp.usercenterbackend.constant.UserConstant.USER_LOGIN_STATE;
+
 /**
  * 用户接口
  */
@@ -50,6 +52,17 @@ public class UserController {
         }
         return userService.userLogin(userAccount, userPassword,request);
     }
+    @GetMapping("/current")
+    public User getCurrentUser(HttpServletRequest request){
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        if (currentUser == null ){
+            return null;
+        }
+        long userId =currentUser.getId();
+        User user = userService.getById(userId);
+        return userService.getSafetyUser(user);
+    }
     @GetMapping("/search")
     public List<User> searchUser(String username,HttpServletRequest request){
         if(!isAdmin(request)){
@@ -77,7 +90,7 @@ public class UserController {
      * 管理员权限校验
      */
     private boolean isAdmin(HttpServletRequest request){
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) userObj;
         return user != null && user.getUserRole() == UserConstant.ADMIN_ROLE;
     }
