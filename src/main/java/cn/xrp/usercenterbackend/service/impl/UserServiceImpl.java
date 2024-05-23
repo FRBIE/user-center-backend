@@ -1,5 +1,7 @@
 package cn.xrp.usercenterbackend.service.impl;
 
+import cn.xrp.usercenterbackend.common.ErrorCode;
+import cn.xrp.usercenterbackend.exception.BusinessException;
 import cn.xrp.usercenterbackend.model.User;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import cn.xrp.usercenterbackend.service.UserService;
@@ -36,30 +38,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         //1.校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         if (userAccount.length() < 4) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账户过短");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户密码过短");
+
         }
         //账户不能包含特殊字符
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (matcher.find()) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账户包含特殊字符");
+
         }
         //密码和校验密码相同
         if (!userPassword.equals(checkPassword)){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户密码和校验密码不同");
+
         }
         //账户不能重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount",userAccount);
         Integer count = userMapper.selectCount(queryWrapper);
         if (count > 0){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户已存在");
+
         }
 
         //2.加密
@@ -69,7 +75,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         boolean saveResult = this.save(user);
         if(!saveResult){
-            return -1;
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"系统异常，注册失败");
         }
         return user.getId();
     }
@@ -78,20 +84,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
         // 1.校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"账号或密码为空");
         }
         if (userAccount.length() < 4) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户不存在");
         }
         if (userPassword.length() < 8){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码错误");
         }
 
         // 账户不能包含特殊字符
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (matcher.find()) {
-            return  null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户不存在");
         }
 
         // 2.加密
@@ -103,7 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = userMapper.selectOne(queryWrapper);
         if(user == null){
             log.info("user login failed, userAccount cannot match userPassword");
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账户密码不匹配");
         }
         //3.用户脱敏
         User safetyUser = getSafetyUser(user);
@@ -111,13 +117,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         request.getSession().setAttribute(USER_LOGIN_STATE,safetyUser);
         return safetyUser;
     }
+
+    @Override
+    public int userLogout(HttpServletRequest request) {
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
+    }
+
     /**
      * 用户脱敏
      */
     @Override
     public User getSafetyUser(User originUser){
         if(originUser == null){
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR,"账户不存在");
         }
         User safetyUser = new User();
         safetyUser.setId(originUser.getId());
