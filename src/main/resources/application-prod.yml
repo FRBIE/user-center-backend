@@ -5,13 +5,11 @@ spring:
   name: user-center
  datasource:
   driver-class-name: com.mysql.cj.jdbc.Driver
-  username: root
-  password: Xrp220903
-  url: jdbc:mysql://localhost:3306/user_center?useUnicode=true&characterEncoding=UTF8&useSSL=false&serverTimezone=GMT%2B8
- profiles:
-  active: prod
+  username: xrp_user_center
+  password: LsmBbmnLBaJ8PiSA
+  url: jdbc:mysql://localhost:3306/xrp_user_center?useUnicode=true&characterEncoding=UTF8&useSSL=false&serverTimezone=GMT%2B8
 server:
- port: 8080
+ port: 5359
  servlet:
   context-path: /api
 mybatis-plus:

@@ -97,7 +97,7 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>cn.xrp.usercenterbackend.UserCenterBackendApplication</mainClass>
-                    <skip>true</skip>
+<!--                    <skip>true</skip>-->
                 </configuration>
                 <executions>
                     <execution>
